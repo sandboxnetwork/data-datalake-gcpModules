@@ -1,12 +1,9 @@
 from setuptools import setup, find_packages
 
 install_requires = [
-    'google-api-core>=2.10.1',
-    'google-auth>=2.11.1',
-    'google-cloud-bigquery>=3.3.2',
-    'google-cloud-bigquery-storage>=2.16.0',
-    'google-cloud-core>=2.3.2',
-    'google-cloud-storage>=2.5.0',
+    "google-auth>=2.12.0",
+    "google-cloud-bigquery>=3.3.3",
+    "google-cloud-storage>=2.5.0"
 ]
 
 setup(name='gcpModules',
