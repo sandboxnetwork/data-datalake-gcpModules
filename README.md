@@ -25,9 +25,13 @@ GCP Modules
 - query    : 쿼리 실행, limit 키워드로 cost 제한 가능
 
 # 2. 설치
+- pip를 최신 버전으로 업그레이드
+```
+(env_name) (project_directory)$ pip install --upgrade pip
+```
 - 다음 명령어 사용하여 설치
 ```
-(env_name) (project_directory)$ pip install git+https://
+(env_name) (project_directory)$ pip install git+https://github.com/sandboxnetwork/data-datalake-gcpModules.git
 ```
 
 # 3. 사용법
