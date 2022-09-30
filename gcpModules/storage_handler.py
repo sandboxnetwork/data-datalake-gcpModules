@@ -1,6 +1,7 @@
 from .base_handler import BaseHandler
 from google.cloud import storage
 from google.oauth2 import service_account
+from tqdm import tqdm
 import os, csv, json
 
 
@@ -62,8 +63,9 @@ class StorageHandler(BaseHandler):
             return _result
 
     def download(self, blob_list, file_path=None):
+        blob_list = blob_list if type(blob_list) is list else list(blob_list)
         fpath_list = []
-        for blob in blob_list:
+        for blob in tqdm(blob_list):
             if(not blob.name.endswith("/")):
                 fname = blob.name.split("/")[-1]
                 fpath = os.path.join(file_path, fname) if file_path else os.path.join(self._file_path, fname)

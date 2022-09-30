@@ -7,6 +7,7 @@ if __name__ == '__main__':
     GCP에서 제공받은 서비스 계정을 입력
     """
     service_account = {}
+    service_account_path = ""
 
     """
     1. Cloud Storage
@@ -14,11 +15,13 @@ if __name__ == '__main__':
 
     Args:
         credentials       : GCP에서 제공받은 서비스 계정
+        credential_path   : GCP에서 제공받은 서비스 계정이 저장된 로컬 경로
         bucket[option]    : storage bucket 이름
         file_path[option] : 다운로드 시 필요한 로컬 파일 경로
     """
     handler = gcpModules.StorageHandler(credentials=service_account)
-    handler = gcpModules.StorageHandler(credentials=service_account, bucket="bucket_name", file_path="file_path")
+    handler = gcpModules.StorageHandler(credential_path=service_account_path)
+    handler = gcpModules.StorageHandler(credential_path=service_account_path, bucket="bucket_name", file_path="file_path")
     
     # storage bucket 이름을 지정 (추후 매번 버킷명을 입력하지 않도록)
     handler.set_bucket("bucket_name")
@@ -53,9 +56,10 @@ if __name__ == '__main__':
         nested[option]    : 하위 디렉토리 포함 여부 (default True)
 
     Return:
-        blob object
+        blob object list
     """
     # 설정된 버킷의 모든 파일 검색
+    blob      = handler.list()
     blob_list = handler.list()
     # 새로 설정하는 버킷의 모든 파일 검색
     blob_list = handler.list(bucket="bucket_name")
@@ -71,15 +75,17 @@ if __name__ == '__main__':
 
     """
     1-3. download
-    파일 다운로드
+    파일 다운로드, progress bar를 사용하여 진행률 표시
     
     Args:
-        blob_list         : list()를 통해 검색한 blob 객체 결과
+        blob or blob_list : list()를 통해 검색한 blob 객체 결과
         file_path[option] : 파일을 다운로드할 로컬 경로
 
     Return:
-        다운로드 완료된 경로 리스트
+        다운로드 완료된 로컬 경로 리스트
     """
+    # 파일 다운로드
+    downloaded_paths = handler.download(blob)
     # 파일 리스트 다운로드
     downloaded_paths = handler.download(blob_list)
     # 파일 리스트 다운로드, file_path 경로
@@ -87,17 +93,17 @@ if __name__ == '__main__':
 
     """
     1-4. read
-    파일 다운로드 및 읽기 (*json, csv 지원)
+    파일 다운로드 및 읽기 (*json, csv 지원, 단일 객체)
     
     Args:
-        blob_list         : list()를 통해 검색한 blob 객체 결과
+        blob              : list()를 통해 검색한 blob 객체 결과, *단일 객체만 가능
         file_path[option] : 파일을 다운로드할 로컬 경로
 
     Return:
         파일 내용
     """
-    result = handler.read(blob_list)
-    result = handler.read(blob_list, file_path="file_path")
+    result = handler.read(blob)
+    result = handler.read(blob, file_path="file_path")
 
     
     """
@@ -106,9 +112,10 @@ if __name__ == '__main__':
 
     Args:
         credentials       : GCP에서 제공받은 서비스 계정
+        credential_path   : GCP에서 제공받은 서비스 계정이 저장된 로컬 경로
     """
     handler = gcpModules.BigQueryHandler(credentials=service_account)
-    
+    handler = gcpModules.BigQueryHandler(credential_path=service_account_path)
     # 조회를 원하는 쿼리문
     # **From절은 dataset가 항상 포함되어 있어야 함
     q = '''
@@ -147,18 +154,21 @@ if __name__ == '__main__':
     """
     기본 사용 시나리오 (storage)
     """
-    service_account = {}
-    handler = gcpModules.StorageHandler(credentials=service_account)
-    handler.set_bucket("bucket_name")
-    handler.set_file_path("file_path")
+    handler = gcpModules.StorageHandler(credential_path=service_account_path, bucket="bucket_name", file_path="file_path")
 
+    # 시나리오 1
     blob_list        = handler.list()
-    downloaded_paths = handler.download(blob_list) # or result = handler.read(blob_list)
+    downloaded_paths = handler.download(blob_list)
+
+    # 시나리오 2
+    blob_list        = handler.list()
+    for blob in blob_list:
+        result = handler.read(blob)
+        # modify result here
 
     """
     기본 사용 시나리오 (Bigquery)
     """
-    service_account = {}
-    handler = gcpModules.BigQueryHandler(credentials=service_account)
+    handler = gcpModules.BigQueryHandler(credential_path=service_account_path)
     q       = ""
     rst     = handler.query(q)
