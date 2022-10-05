@@ -25,6 +25,11 @@ class StorageHandler(BaseHandler):
     def set_file_path(self, file_path):
         self._file_path = file_path
 
+    def get_file_path(self):
+        if self._file_path is None:
+            raise Exception("Must define file path by method: set_file_path()")
+        return self._file_path
+
     # Get Cloud Storage object
     def __get_cloud_storage_blob(self, name):
         client = self.__get_cloud_storage_client()
@@ -47,6 +52,9 @@ class StorageHandler(BaseHandler):
         return list(client.list_blobs(self._bucket, prefix=prefix, delimiter=delimiter))
 
     def read(self, blob_list, file_path=None):
+        # remove folder within blob_list
+        if blob_list.name.endswith("/"):
+            return {}
         fpath_list = self.download(blob_list, file_path)
         if len(fpath_list) > 1:
             print(f"Must input one file to read, file count: f{len(fpath_list)}")
@@ -63,12 +71,12 @@ class StorageHandler(BaseHandler):
             return _result
 
     def download(self, blob_list, file_path=None):
-        blob_list = blob_list if type(blob_list) is list else list(blob_list)
+        blob_list = blob_list if type(blob_list) is list else [blob_list]
         fpath_list = []
         for blob in tqdm(blob_list):
             if(not blob.name.endswith("/")):
                 fname = blob.name.split("/")[-1]
-                fpath = os.path.join(file_path, fname) if file_path else os.path.join(self._file_path, fname)
+                fpath = os.path.join(file_path, fname) if file_path else os.path.join(self.get_file_path(), fname)
                 blob.download_to_filename(fpath)
                 fpath_list.append(fpath)
         return fpath_list
